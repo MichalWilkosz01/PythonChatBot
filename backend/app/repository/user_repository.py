@@ -1,14 +1,13 @@
 from sqlalchemy.orm import Session
 from typing import Optional, List
 
-from data.models import User, UserHistory
+from data.models import User
 
 
 class UserRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    # ===== USERS =====
     def get_by_id(self, user_id: int) -> Optional[User]:
         return self.db.query(User).filter(User.id == user_id).first()
 
@@ -60,34 +59,3 @@ class UserRepository:
         self.db.delete(user)
         self.db.commit()
 
-    # ===== USER HISTORY =====
-    def add_history(
-        self,
-        user_id: int,
-        query: str,
-        response: str,
-    ) -> UserHistory:
-        history = UserHistory(
-            user_id=user_id,
-            query=query,
-            response=response,
-        )
-        self.db.add(history)
-        self.db.commit()
-        self.db.refresh(history)
-        return history
-
-    def get_history(
-        self,
-        user_id: int,
-        limit: int = 50,
-        offset: int = 0,
-    ) -> List[UserHistory]:
-        return (
-            self.db.query(UserHistory)
-            .filter(UserHistory.user_id == user_id)
-            .order_by(UserHistory.created_at.desc())
-            .offset(offset)
-            .limit(limit)
-            .all()
-        )
