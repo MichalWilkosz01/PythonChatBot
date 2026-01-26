@@ -8,8 +8,6 @@ from app.repository.db import get_db
 from app.repository.user_repository import UserRepository
 from data.models import User
 
-# Zmieniamy schemat na HTTPBearer - teraz FastAPI oczekuje nagłówka "Authorization: Bearer <token>"
-# auto_error=True sprawi, że FastAPI samo rzuci 403, jeśli nagłówka brakuje.
 security_scheme = HTTPBearer()
 
 def get_current_user(
@@ -42,18 +40,12 @@ def get_current_user(
 def get_current_user_api_key(
     current_user: User = Depends(get_current_user),
 ) -> str:
-    """
-    Pobiera zaszyfrowany klucz API z obiektu użytkownika i go deszyfruje.
-    Wymaga SECRET_KEY do deszyfracji, bo tak go zapisujemy w UserRepository.
-    """
     if not current_user.encrypted_api_key:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, 
             detail="Gemini API Key not found for this user. Please update your profile."
         )
 
-    # Deszyfrujemy klucz pobrany z bazy danych
-    # Używamy SECRET_KEY, bo Repository używa go do szyfrowania przy zapisie
     plain_api_key = decrypt_data(current_user.encrypted_api_key, SECRET_KEY)
     
     if not plain_api_key:

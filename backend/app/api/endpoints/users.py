@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends
-import jwt
+from jose import jwt, JWTError, ExpiredSignatureError
 from sqlalchemy.orm import Session
 
 from app.api.dtos.users.refresh_token import RefreshToken
@@ -8,7 +8,6 @@ from app.api.dtos.users.user_register import UserRegister
 from app.api.dtos.users.user_login import UserLogin
 from app.api.dtos.users.token import Token
 from app.core.security import (
-    decrypt_data,
     hash_password,
     verify_password,
     create_access_token,
@@ -43,7 +42,7 @@ def register(
             detail="Email already exists",
         )
 
-    encrypted_api_key = encrypt_data(data.gemini_api_key, data.password)
+    encrypted_api_key = encrypt_data(data.gemini_api_key, SECRET_KEY)
 
     user = repo.create(
         username=data.username,
@@ -71,14 +70,6 @@ def login(
             status_code=401,
             detail="Invalid credentials",
         )
-
-    # 1. Decrypt the API Key using the User's Password (which we only have right now).
-    plain_api_key = decrypt_data(user.encrypted_api_key, data.password)
-
-    # 2. Re - encrypt it using the Server's SECRET_KEY.
-    # The re - encryption here is needed because we don't store the user's password.
-    # This means we can't decrypt later without it.
-    session_key = encrypt_data(plain_api_key, SECRET_KEY)
 
     access_payload = {
         "sub": user.username, 
@@ -115,9 +106,9 @@ def refresh(data: RefreshToken):
             refresh_token=create_refresh_token({"sub": user_id, "type": "refresh"}),
         )
 
-    except jwt.ExpiredSignatureError:
+    except ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Refresh token expired")
-    except jwt.InvalidTokenError:
+    except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
 @router.patch("/edit", response_model=dict)
@@ -128,7 +119,10 @@ def update_profile(
 ):
     repo = UserRepository(db)
     
-    # Sprawdzenie czy email nie jest już zajęty (jeśli jest zmieniany)
+    if updates.username and updates.username != current_user.username:
+        if repo.get_by_username(updates.username):
+            raise HTTPException(status_code=400, detail="Username already taken")
+
     if updates.email and updates.email != current_user.email:
         if repo.get_by_email(updates.email):
             raise HTTPException(status_code=400, detail="Email already registered")

@@ -7,9 +7,10 @@ pyodbc
 cryptography
 fastapi
 uvicorn
-google-generativeai
+google-genai
 duckduckgo-search
+openai
 beautifulsoup4
 html5lib
 python-jose
-passlib
+bcrypt
