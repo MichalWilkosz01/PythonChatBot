@@ -61,15 +61,15 @@ def chat(
     if request.conversation_id:
         db_history = repo.get_user_history(current_user.id, conversation_id=request.conversation_id)
         for msg in db_history:
-            formatted_history.append({"role": "user", "parts": [msg.query]})
-            formatted_history.append({"role": "model", "parts": [msg.response]})
+            formatted_history.append({"role": "user", "parts": [{"text": msg.query}]})
+            formatted_history.append({"role": "model", "parts": [{"text": msg.response}]})
 
     try:
         agent = ChatAgent(api_key=api_key)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to initialize Chat Agent: {str(e)}")
 
-    response_text = agent.generate_response(request.query, history=formatted_history)
+    response_text, sources = agent.generate_response(request.query, history=formatted_history)
 
     repo.create_message(
         user_id=current_user.id,
@@ -80,5 +80,6 @@ def chat(
 
     return ChatResponse(
         response=response_text,
-        conversation_id=request.conversation_id
+        conversation_id=request.conversation_id,
+        sources=sources
     )
