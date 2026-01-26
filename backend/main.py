@@ -1,14 +1,13 @@
 import uvicorn
 from fastapi import FastAPI
 from app.api.endpoints.users import router as users_router
+from app.api.endpoints.chat import router as chat_router
+
+LOCALHOST = "127.0.0.1"
 
 app = FastAPI()
 
-# Dodajemy router użytkowników
 app.include_router(users_router)
-
-# To jest kluczowa część, która uruchamia serwer
+app.include_router(chat_router)
 if __name__ == "__main__":
-    # "main:app" oznacza: szukaj w pliku main.py obiektu app
-    # reload=True sprawia, że serwer zrestartuje się sam po zmianie kodu
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+    uvicorn.run("main:app", host=LOCALHOST, port=8000, reload=True)

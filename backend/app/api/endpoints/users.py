@@ -7,6 +7,7 @@ from app.api.dtos.users.user_register import UserRegister
 from app.api.dtos.users.user_login import UserLogin
 from app.api.dtos.users.token import Token
 from app.core.security import (
+    decrypt_data,
     hash_password,
     verify_password,
     create_access_token,
@@ -67,8 +68,20 @@ def login(
             detail="Invalid credentials",
         )
 
-    access_payload = {"sub": str(user.id), "type": "access"}
-    refresh_payload = {"sub": str(user.id), "type": "refresh"}
+    # 1. Decrypt the API Key using the User's Password (which we only have right now).
+    plain_api_key = decrypt_data(user.encrypted_api_key, data.password)
+
+    # 2. Re - encrypt it using the Server's SECRET_KEY.
+    # The re - encryption here is needed because we don't store the user's password.
+    # This means we can't decrypt later without it.
+    session_key = encrypt_data(plain_api_key, SECRET_KEY)
+
+    access_payload = {
+        "sub": user.username, 
+        "type": "access",
+        "sak": session_key # Session API Key
+    }
+    refresh_payload = {"sub": user.username, "type": "refresh"}
 
     return Token(
         access_token=create_access_token(access_payload),
