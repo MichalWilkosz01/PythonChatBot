@@ -5,3 +5,4 @@ alembic
 sqlalchemy
 pyodbc
 cryptography
+fastapi

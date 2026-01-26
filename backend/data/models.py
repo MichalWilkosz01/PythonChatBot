@@ -14,18 +14,32 @@ class User(Base):
     encrypted_api_key = Column(String(500), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
-    history = relationship("UserHistory", back_populates="user")
+    conversations = relationship("Conversation", back_populates="user")
+    messages = relationship("Message", back_populates="user")
 
-class UserHistory(Base):
-    __tablename__ = "user_history"
+class Conversation(Base):
+    __tablename__ = "conversations"
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    title = Column(String(200), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    user = relationship("User", back_populates="conversations")
+    messages = relationship("Message", back_populates="conversation", cascade="all, delete-orphan")
+
+class Message(Base):
+    __tablename__ = "messages"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    conversation_id = Column(Integer, ForeignKey("conversations.id"), nullable=True)
     query = Column(Text, nullable=False)
     response = Column(Text, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    user = relationship("User", back_populates="history")
+    user = relationship("User", back_populates="messages")
+    conversation = relationship("Conversation", back_populates="messages")
 
 class DocumentEmbedding(Base):
     __tablename__ = "document_embeddings"
