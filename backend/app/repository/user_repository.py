@@ -1,6 +1,8 @@
 from sqlalchemy.orm import Session
 from typing import Optional, List
 
+from app.api.dtos.users.user_update import UserUpdate
+from app.core.security import SECRET_KEY, encrypt_data, hash_password, verify_password
 from data.models import User
 
 
@@ -58,4 +60,31 @@ class UserRepository:
     def delete(self, user: User) -> None:
         self.db.delete(user)
         self.db.commit()
+        
+    def update_user(self, user_id: int, updates: UserUpdate) -> Optional[User]:
+        user = self.get_by_id(user_id)
+        if not user:
+            return None
 
+        # 1. Zmiana Email
+        if updates.email:
+            user.email = updates.email
+        
+        # 2. Zmiana Hasła (wykorzystuje Twoje hash_password)
+        if updates.new_password:
+            user.hashed_password = hash_password(updates.new_password)
+
+        # 3. Zmiana API Key (wykorzystuje Twoje encrypt_data)
+        # Szyfrujemy używając SECRET_KEY jako hasła bazowego do derywacji klucza
+        if updates.api_key:
+            user.encrypted_api_key = encrypt_data(updates.api_key, SECRET_KEY)
+
+        self.db.commit()
+        self.db.refresh(user)
+        return user
+
+    def verify_user_credentials(self, username: str, password: str) -> Optional[User]:
+        user = self.get_by_username(username)
+        if user and verify_password(password, user.hashed_password):
+            return user
+        return None

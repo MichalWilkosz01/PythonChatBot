@@ -12,34 +12,6 @@ from data.models import User
 # auto_error=True sprawi, że FastAPI samo rzuci 403, jeśli nagłówka brakuje.
 security_scheme = HTTPBearer()
 
-def get_current_user_api_key(
-    auth: HTTPAuthorizationCredentials = Depends(security_scheme),
-) -> str:
-    token = auth.credentials  # Wyciągamy sam ciąg znaków tokena
-    
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        
-        session_key = payload.get("sak")
-        if not session_key:
-             raise HTTPException(status_code=401, detail="Token missing API Key permissions")
-
-        plain_api_key = decrypt_data(session_key, SECRET_KEY)
-        
-        if not plain_api_key:
-             raise credentials_exception
-
-        return plain_api_key
-
-    except JWTError:
-        raise credentials_exception
-
 def get_current_user(
     auth: HTTPAuthorizationCredentials = Depends(security_scheme),
     db: Session = Depends(get_db)
@@ -66,3 +38,28 @@ def get_current_user(
     if user is None:
         raise credentials_exception
     return user
+
+def get_current_user_api_key(
+    current_user: User = Depends(get_current_user),
+) -> str:
+    """
+    Pobiera zaszyfrowany klucz API z obiektu użytkownika i go deszyfruje.
+    Wymaga SECRET_KEY do deszyfracji, bo tak go zapisujemy w UserRepository.
+    """
+    if not current_user.encrypted_api_key:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail="Gemini API Key not found for this user. Please update your profile."
+        )
+
+    # Deszyfrujemy klucz pobrany z bazy danych
+    # Używamy SECRET_KEY, bo Repository używa go do szyfrowania przy zapisie
+    plain_api_key = decrypt_data(current_user.encrypted_api_key, SECRET_KEY)
+    
+    if not plain_api_key:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to decrypt API Key."
+        )
+
+    return plain_api_key

@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends
+import jwt
 from sqlalchemy.orm import Session
 
 from app.api.dtos.users.refresh_token import RefreshToken
@@ -17,6 +18,9 @@ from app.core.security import (
     ALGORITHM,
 )
 from app.repository.db import get_db
+from app.api.deps import get_current_user
+from app.api.dtos.users.user_update import UserUpdate
+from data.models import User
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -78,8 +82,7 @@ def login(
 
     access_payload = {
         "sub": user.username, 
-        "type": "access",
-        "sak": session_key # Session API Key
+        "type": "access"
     }
     refresh_payload = {"sub": user.username, "type": "refresh"}
 
@@ -116,3 +119,23 @@ def refresh(data: RefreshToken):
         raise HTTPException(status_code=401, detail="Refresh token expired")
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid token")
+
+@router.patch("/edit", response_model=dict)
+def update_profile(
+    updates: UserUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    repo = UserRepository(db)
+    
+    # Sprawdzenie czy email nie jest już zajęty (jeśli jest zmieniany)
+    if updates.email and updates.email != current_user.email:
+        if repo.get_by_email(updates.email):
+            raise HTTPException(status_code=400, detail="Email already registered")
+
+    updated_user = repo.update_user(current_user.id, updates)
+    
+    if not updated_user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return {"message": "Profile updated successfully"}
