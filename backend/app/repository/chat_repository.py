@@ -1,27 +1,36 @@
-from typing import List, Optional
 from sqlalchemy.orm import Session
-from data.models import Message
+from data.models import Conversation, Message # Upewnij się, że importujesz właściwe modele
 
 class ChatRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_user_history(self, user_id: int) -> List[Message]:
-        return (
-            self.db.query(Message)
-            .filter(Message.user_id == user_id)
-            .order_by(Message.created_at.asc())
-            .all()
+    def create_conversation(self, user_id: int, title: str) -> int:
+        """Tworzy nową rozmowę i zwraca jej unikalne ID."""
+        new_conv = Conversation(
+            user_id=user_id,
+            title=title
         )
+        self.db.add(new_conv)
+        self.db.commit()
+        self.db.refresh(new_conv)
+        return new_conv.id
 
-    def create_message(self, user_id: int, query: str, response: str, conversation_id: Optional[int] = None) -> Message:
-        msg = Message(
+    def get_user_history(self, user_id: int, conversation_id: int = None):
+        """Pobiera wiadomości dla danej rozmowy."""
+        query = self.db.query(Message).filter(Message.user_id == user_id)
+        if conversation_id:
+            query = query.filter(Message.conversation_id == conversation_id)
+        return query.order_by(Message.created_at.asc()).all()
+
+    def create_message(self, user_id: int, query: str, response: str, conversation_id: int = None):
+        """Zapisuje nową wiadomość w historii."""
+        new_msg = Message(
             user_id=user_id,
             query=query,
             response=response,
             conversation_id=conversation_id
         )
-        self.db.add(msg)
+        self.db.add(new_msg)
         self.db.commit()
-        self.db.refresh(msg)
-        return msg
+        return new_msg
