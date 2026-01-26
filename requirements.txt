@@ -6,3 +6,10 @@ sqlalchemy
 pyodbc
 cryptography
 fastapi
+uvicorn
+google-generativeai
+duckduckgo-search
+beautifulsoup4
+html5lib
+python-jose
+passlib
