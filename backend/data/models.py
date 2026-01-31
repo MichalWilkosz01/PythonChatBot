@@ -12,6 +12,7 @@ class User(Base):
     email = Column(String(100), unique=True, index=True, nullable=False)
     password_hash = Column(String(255), nullable=False)
     encrypted_api_key = Column(String(500), nullable=True)
+    recovery_tokens = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     conversations = relationship("Conversation", back_populates="user")

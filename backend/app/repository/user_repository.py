@@ -33,12 +33,14 @@ class UserRepository:
         email: str,
         password_hash: str,
         encrypted_api_key: Optional[str] = None,
+        recovery_tokens: Optional[str] = None,
     ) -> User:
         user = User(
             username=username,
             email=email,
             password_hash=password_hash,
             encrypted_api_key=encrypted_api_key,
+            recovery_tokens=recovery_tokens,
         )
         self.db.add(user)
         self.db.commit()
