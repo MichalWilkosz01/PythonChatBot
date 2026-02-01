@@ -4,8 +4,9 @@ import Sidebar from './components/Sidebar';
 import ChatArea from './components/ChatArea';
 import LoginPage from '../LoginPage/LoginPage';
 import localStorageService from '../../services/localStorageService';
+import chatService from '../../services/chatService';
 
-// Funkcja pomocnicza do dekodowania JWT (bez instalowania dodatkowych bibliotek)
+// Funkcja pomocnicza do dekodowania JWT
 const parseJwt = (token) => {
     try {
         const base64Url = token.split('.')[1];
@@ -23,6 +24,9 @@ const HomePage = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(() => !!localStorageService.getAccessToken());
     const [userData, setUserData] = useState(() => localStorageService.getItem('user_data'));
     const [chatHistory, setChatHistory] = useState([]);
+    const [isChatLoading, setIsChatLoading] = useState(false);
+    const [activeChatId, setActiveChatId] = useState(null);
+    const [currentMessages, setCurrentMessages] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
 
     const handleLogout = useCallback(() => {
@@ -40,13 +44,34 @@ const HomePage = () => {
 
             if (decodedToken && decodedToken.sub) {
                 const userPayload = { username: decodedToken.sub };
-                console.log(userPayload)
                 localStorageService.setItem('user_data', userPayload);
                 setUserData(userPayload);
             }
 
             setIsLoggedIn(true);
         }
+    };
+
+    const handleChatSelect = async (chatId) => {
+        setActiveChatId(chatId);
+        setIsChatLoading(true);
+        try {
+            const messages = await chatService.getMessages(chatId);
+            setCurrentMessages(messages);
+        } catch (error) {
+            console.error("Nie udało się pobrać wiadomości", error);
+        } finally {
+            setIsChatLoading(false);
+        }
+    };
+
+    // --- NOWA FUNKCJA: Obsługa dodania nowej wiadomości bez odświeżania ---
+    const handleMessageUpdate = (newMessage) => {
+        // Dodajemy nową wiadomość do istniejącej tablicy wiadomości
+        setCurrentMessages((prevMessages) => [...prevMessages, newMessage]);
+
+        // Opcjonalnie: Tutaj można by też zaktualizować listę chatHistory, 
+        // np. przenieść aktywny czat na górę listy, ale to dodatkowy feature.
     };
 
     useEffect(() => {
@@ -56,26 +81,13 @@ const HomePage = () => {
             const fetchHistory = async () => {
                 setIsLoading(true);
                 try {
-                    // Używamy serwisu do pobrania tokena
-                    const token = localStorageService.getAccessToken();
+                    const data = await chatService.getConversations();
 
-                    // Upewnij się, że ten URL jest poprawny (wcześniej miałeś błąd 404/405)
-                    const response = await fetch('http://127.0.0.1:8000/chat/history', { // <-- Zmieniłem na /chats, sprawdź swój endpoint!
-                        method: 'GET',
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json'
-                        }
-                    });
-
-                    if (response.ok) {
-                        const data = await response.json();
-                        if (isMounted) setChatHistory(data);
-                    } else if (response.status === 401) {
-                        handleLogout();
+                    if (isMounted) {
+                        setChatHistory(data);
                     }
                 } catch (error) {
-                    console.error("Błąd sieci:", error);
+                    console.error("Błąd pobierania historii czatów:", error);
                 } finally {
                     if (isMounted) setIsLoading(false);
                 }
@@ -85,7 +97,7 @@ const HomePage = () => {
         }
 
         return () => { isMounted = false; };
-    }, [isLoggedIn, handleLogout]);
+    }, [isLoggedIn]);
 
     // --- RENDEROWANIE ---
 
@@ -95,10 +107,17 @@ const HomePage = () => {
                 <Sidebar
                     history={chatHistory}
                     onLogout={handleLogout}
-                    // isLoading={isLoading} // Sidebar zazwyczaj nie potrzebuje loadera, chyba że chcesz go tam wyświetlać
-                    userData={userData} // Teraz userData jest poprawnie przekazywane
+                    userData={userData}
+                    onSelectChat={handleChatSelect}
+                    activeChatId={activeChatId}
                 />
-                <ChatArea />
+                <ChatArea
+                    messages={currentMessages}
+                    isLoading={isChatLoading}
+                    activeChatId={activeChatId}
+                    // Przekazujemy funkcję aktualizującą stan
+                    onMessageSent={handleMessageUpdate}
+                />
             </div>
         );
     }

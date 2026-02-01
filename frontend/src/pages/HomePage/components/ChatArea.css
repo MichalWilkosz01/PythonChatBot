@@ -1,0 +1,274 @@
+/* ChatArea.css - Desktop Professional Dark Mode */
+
+/* --- GŁÓWNY LAYOUT --- */
+
+.chat-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background-color: #1a1a1a;
+    position: relative;
+    overflow: hidden;
+    /* Dodajemy subtelny gradient w tle dla głębi */
+    background-image: radial-gradient(circle at 50% 0%, #2a2a2a 0%, #1a1a1a 50%);
+}
+
+/* Widoki pomocnicze */
+.welcome-view,
+.loading-view {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: #a1a1aa;
+    height: 100%;
+    /* Ograniczenie szerokości dla lepszego wyglądu na dużym ekranie */
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.welcome-view h1 {
+    color: #ffffff;
+    margin-bottom: 1.5rem;
+    font-size: 2.5rem;
+    /* Większy nagłówek na desktop */
+    font-weight: 600;
+    letter-spacing: -0.5px;
+}
+
+.spinner {
+    animation: spin 1s linear infinite;
+    color: #3b82f6;
+    /* Niebieski */
+    width: 40px;
+    height: 40px;
+    margin-bottom: 1.5rem;
+}
+
+/* --- LISTA WIADOMOŚCI --- */
+
+.messages-container {
+    flex: 1;
+    padding: 2rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    /* Większy odstęp między wiadomościami na desktopie */
+
+    /* KLUCZOWA ZMIANA: Centrowanie na środku ekranu */
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+/* Scrollbar */
+.messages-container::-webkit-scrollbar {
+    width: 10px;
+}
+
+.messages-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.messages-container::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    border: 2px solid #1a1a1a;
+    /* Margines wokół suwaka */
+}
+
+.messages-container::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.empty-info {
+    text-align: center;
+    color: #71717a;
+    margin-top: 2rem;
+    font-size: 0.9rem;
+}
+
+/* --- WIADOMOŚCI --- */
+
+.message-wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.message {
+    display: flex;
+    gap: 1.25rem;
+    /* Zmniejszamy max-width, żeby tekst nie był "ścianą" na szerokim monitorze */
+    max-width: 75%;
+    align-items: flex-start;
+    /* Awatary zawsze przy górnej krawędzi wiadomości */
+}
+
+.user-message {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+}
+
+.bot-message {
+    align-self: flex-start;
+}
+
+/* Dymki */
+.bubble {
+    padding: 1rem 1.5rem;
+    /* Większy padding wewnątrz dymka */
+    border-radius: 16px;
+    line-height: 1.6;
+    /* Lepsza interlinia dla czytelności */
+    font-size: 1rem;
+    position: relative;
+}
+
+.user-bubble {
+    background-color: #2563eb;
+    color: #ffffff;
+    border-bottom-right-radius: 4px;
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2);
+    /* Bardziej miękki cień */
+}
+
+.bot-bubble {
+    /* Zmiana na styl bardziej "desktopowy" - brak ramki, czyste tło */
+    background: #27272a;
+    color: #e4e4e7;
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Awatary */
+.avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 1.1rem;
+
+    /* ZMIANA: Obniżenie ikonek */
+    margin-top: 10px;
+    /* Zwiększ lub zmniejsz tę wartość, aby idealnie dopasować wysokość */
+}
+
+.user-avatar {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: white;
+    box-shadow: 0 2px 10px rgba(37, 99, 235, 0.3);
+}
+
+.bot-avatar {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
+}
+
+/* --- OBSZAR WPISYWANIA (INPUT) --- */
+
+.input-area {
+    /* KLUCZOWA POPRAWKA: box-sizing zapobiega wychodzeniu poza kontener */
+    box-sizing: border-box;
+    width: 100%;
+
+    padding: 2rem;
+
+    /* Upewniamy się, że tło nie wychodzi poza obszar */
+    background: linear-gradient(to top, #1a1a1a 80%, rgba(26, 26, 26, 0) 100%);
+
+    display: flex;
+    justify-content: center;
+    position: relative;
+    /* Zabezpieczenie pozycji */
+    z-index: 10;
+    /* Upewnia się, że jest nad treścią, ale pod modalem/sidebar'em jeśli ten ma wyższy index */
+}
+
+/* Wrapper formularza - bez zmian, ale dla pewności */
+.input-wrapper {
+    width: 100%;
+    max-width: 900px;
+    box-sizing: border-box;
+    /* To też jest ważne */
+
+    position: relative;
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-end;
+    background: #27272a;
+    padding: 10px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+/* Reszta bez zmian... */
+.input-area input {
+    flex: 1;
+    padding: 12px 16px;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 1rem;
+    outline: none;
+    min-height: 24px;
+}
+
+/* Efekt skupienia na całym wrapperze (opcjonalnie, wymaga JS lub struktury focus-within) */
+.input-wrapper:focus-within {
+    border-color: #3b82f6;
+    box-shadow: 0 10px 30px -5px rgba(37, 99, 235, 0.2);
+}
+
+
+.input-area input::placeholder {
+    color: #71717a;
+}
+
+/* Przycisk wysyłania */
+.input-area button {
+    background: #3b82f6;
+    /* Pełny kolor tła przycisku */
+    border: none;
+    color: white;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.input-area button:hover:not(:disabled) {
+    background: #2563eb;
+    transform: translateY(-1px);
+}
+
+.input-area button:disabled {
+    background: #3f3f46;
+    color: #71717a;
+    cursor: not-allowed;
+    transform: none;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}

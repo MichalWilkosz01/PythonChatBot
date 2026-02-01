@@ -1,9 +1,9 @@
 import React from 'react';
 import { MessageSquare, Plus, History, User, LogOut } from 'lucide-react';
 
-const Sidebar = ({ history, onLogout, userData }) => {
+const Sidebar = ({ history, onLogout, userData, onSelectChat, activeChatId }) => {
     const displayName = userData?.username || userData?.email || 'Użytkownik';
-    console.log(displayName)
+
     return (
         <aside className="sidebar">
             <div className="sidebar-header">
@@ -19,9 +19,16 @@ const Sidebar = ({ history, onLogout, userData }) => {
             <div className="history-list">
                 <p className="history-label">Historia</p>
                 {history.map((chat) => (
-                    <div key={chat.id} className="history-item">
+                    <div
+                        key={chat.id}
+                        // Dodajemy klasę 'active' jeśli ID się zgadza
+                        className={`history-item ${activeChatId === chat.id ? 'active' : ''}`}
+                        // Wywołujemy pobieranie wiadomości
+                        onClick={() => onSelectChat(chat.id)}
+                        style={{ cursor: 'pointer' }} // Wizualna wskazówka
+                    >
                         <History size={16} />
-                        <span>{chat.title}</span>
+                        <span className="truncate">{chat.title}</span>
                     </div>
                 ))}
             </div>

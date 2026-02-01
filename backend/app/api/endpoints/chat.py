@@ -8,6 +8,7 @@ from app.core.chat_agent import ChatAgent
 from app.repository.db import get_db
 from app.repository.chat_repository import ChatRepository
 from app.api.dtos.chat_history import MessageDTO
+from app.api.dtos.conversation_history import ConversationHistory
 from data.models import User
 
 router = APIRouter(prefix="/chat", tags=["chat"])
@@ -47,6 +48,14 @@ def get_history(
     
     repo = ChatRepository(db)
     return repo.get_user_history(current_user.id, conversation_id=conversation_id)
+
+@router.get("/conversations", response_model=list[ConversationHistory])
+def get_conversations(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    repo = ChatRepository(db)
+    return repo.get_user_conversations(current_user.id)
 
 @router.post("/", response_model=ChatResponse)
 def chat(

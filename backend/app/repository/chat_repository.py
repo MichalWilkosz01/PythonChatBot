@@ -1,3 +1,4 @@
+from sqlalchemy import desc
 from sqlalchemy.orm import Session
 from data.models import Conversation, Message # Upewnij się, że importujesz właściwe modele
 
@@ -34,3 +35,13 @@ class ChatRepository:
         self.db.add(new_msg)
         self.db.commit()
         return new_msg
+    
+    def get_user_conversations(self, user_id: int):
+        """
+        Pobiera listę rozmów użytkownika (do paska bocznego).
+        Sortuje od najnowszych do najstarszych.
+        """
+        return self.db.query(Conversation)\
+            .filter(Conversation.user_id == user_id)\
+            .order_by(desc(Conversation.created_at))\
+            .all()
