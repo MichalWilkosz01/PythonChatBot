@@ -1,0 +1,195 @@
+/* === WIDOK POWITALNY (NIEZALOGOWANY) === */
+.home-container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #1a1a1a;
+    color: #ffffff;
+    text-align: center;
+}
+
+.glass-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    padding: 3rem;
+    border-radius: 20px;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.icon {
+    color: #2563eb;
+}
+
+h1 {
+    font-size: 2.5rem;
+    margin: 0;
+    font-weight: 700;
+}
+
+.description {
+    color: #a1a1aa;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.start-btn {
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    padding: 12px 32px;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.start-btn:hover {
+    background-color: #1d4ed8;
+    transform: translateY(-2px);
+}
+
+/* === WIDOK PANELU (ZALOGOWANY) === */
+.dashboard-container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    /* Układ poziomy: Lewo (Sidebar) | Prawo (Czat) */
+    background-color: #1a1a1a;
+    color: white;
+    overflow: hidden;
+}
+
+/* Sidebar (Lewa strona) */
+.sidebar {
+    width: 280px;
+    background: rgba(255, 255, 255, 0.03);
+    /* Bardzo subtelne tło */
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+    flex-shrink: 0;
+    /* Sidebar się nie zgniata */
+}
+
+.sidebar-header {
+    margin-bottom: 2rem;
+}
+
+.logo-small {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+}
+
+.icon-blue {
+    color: #2563eb;
+}
+
+.new-chat-btn {
+    width: 100%;
+    background: rgba(37, 99, 235, 0.1);
+    border: 1px solid rgba(37, 99, 235, 0.3);
+    color: #3b82f6;
+    padding: 10px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.new-chat-btn:hover {
+    background: rgba(37, 99, 235, 0.2);
+}
+
+/* Lista historii */
+.history-list {
+    flex: 1;
+    /* Zajmuje dostępne miejsce */
+    overflow-y: auto;
+    margin-bottom: 1rem;
+}
+
+.history-label {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.history-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #d1d5db;
+    transition: background 0.2s;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.history-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+}
+
+/* Sekcja użytkownika na dole */
+.user-section {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9rem;
+}
+
+.logout-btn {
+    background: transparent;
+    border: none;
+    color: #ef4444;
+    /* Czerwony kolor */
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+.logout-btn:hover {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+/* Główny obszar (Prawa strona) */
+.main-chat-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: #1a1a1a;
+    position: relative;
+}
