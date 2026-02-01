@@ -1,29 +1,58 @@
 import React, { useState } from 'react';
-import { User, Mail, Lock, ArrowRight } from 'lucide-react'; // Opcjonalnie: ikonki dla lepszego efektu
+import { User, Mail, Lock, Key, ArrowRight, Loader2 } from 'lucide-react';
+import authService from '../../services/authService';
 import './LoginPage.css';
 
-const LoginPage = () => {
-    // Stan decydujący, który widok pokazać (true = logowanie, false = rejestracja)
+const LoginPage = ({ onLoginSuccess }) => {
     const [isLoginView, setIsLoginView] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(null);
 
-    // Przykładowe stany dla formularzy (do późniejszego wykorzystania)
     const [formData, setFormData] = useState({
         username: '',
         email: '',
-        password: ''
+        password: '',
+        gemini_api_key: ''
     });
 
     const handleInputChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value
-        });
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+        if (error) setError(null);
     };
 
-    const handleSubmit = (e) => {
+    const toggleView = () => {
+        setIsLoginView(!isLoginView);
+        setError(null);
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log(isLoginView ? "Logowanie..." : "Rejestracja...", formData);
-        // Tutaj dodałbyś logikę połączenia z backendem
+        setIsLoading(true);
+        setError(null);
+
+        try {
+            let data;
+            if (isLoginView) {
+                data = await authService.login(formData.email, formData.password);
+            } else {
+                data = await authService.register(formData);
+            }
+            console.log(data)
+            const token = data.access_token || data.token;
+            if (token) {
+                onLoginSuccess(token);
+            } else {
+                throw new Error("Nie otrzymano tokenu autoryzacyjnego.");
+            }
+        } catch (err) {
+            setError(err.message || 'Wystąpił nieoczekiwany błąd.');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -33,29 +62,15 @@ const LoginPage = () => {
                     <h1>{isLoginView ? 'Witaj ponownie!' : 'Stwórz konto'}</h1>
                     <p className="description">
                         {isLoginView
-                            ? 'Zaloguj się, aby kontynuować pracę z asystentem.'
-                            : 'Dołącz do nas i zacznij korzystać z SmartBot AI.'}
+                            ? 'Zaloguj się, aby kontynuować.'
+                            : 'Wypełnij dane, aby się zarejestrować.'}
                     </p>
                 </div>
 
-                <form className="form-container" onSubmit={handleSubmit}>
-                    {/* Pole Nazwa Użytkownika - widoczne tylko przy rejestracji */}
-                    {!isLoginView && (
-                        <div className="input-group">
-                            <User className="input-icon" size={20} />
-                            <input
-                                type="text"
-                                name="username"
-                                placeholder="Nazwa użytkownika"
-                                className="input-field"
-                                value={formData.username}
-                                onChange={handleInputChange}
-                                required={!isLoginView}
-                            />
-                        </div>
-                    )}
+                {error && <div className="error-message">{error}</div>}
 
-                    {/* Pole Email */}
+                <form className="form-container" onSubmit={handleSubmit}>
+                    {/* Email - zawsze widoczny */}
                     <div className="input-group">
                         <Mail className="input-icon" size={20} />
                         <input
@@ -69,7 +84,37 @@ const LoginPage = () => {
                         />
                     </div>
 
-                    {/* Pole Hasło */}
+                    {/* Pola widoczne tylko przy REJESTRACJI */}
+                    {!isLoginView && (
+                        <>
+                            <div className="input-group">
+                                <User className="input-icon" size={20} />
+                                <input
+                                    type="text"
+                                    name="username"
+                                    placeholder="Nazwa użytkownika"
+                                    className="input-field"
+                                    value={formData.username}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                            </div>
+                            <div className="input-group">
+                                <Key className="input-icon" size={20} />
+                                <input
+                                    type="password"
+                                    name="gemini_api_key"
+                                    placeholder="Gemini API Key"
+                                    className="input-field"
+                                    value={formData.gemini_api_key}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                            </div>
+                        </>
+                    )}
+
+                    {/* Hasło - zawsze widoczne */}
                     <div className="input-group">
                         <Lock className="input-icon" size={20} />
                         <input
@@ -83,20 +128,22 @@ const LoginPage = () => {
                         />
                     </div>
 
-                    <button type="submit" className="submit-btn">
-                        {isLoginView ? 'Zaloguj się' : 'Zarejestruj się'}
-                        <ArrowRight size={20} />
+                    <button type="submit" className="submit-btn" disabled={isLoading}>
+                        {isLoading ? (
+                            <Loader2 className="spinner" size={20} />
+                        ) : (
+                            <>
+                                {isLoginView ? 'Zaloguj się' : 'Zarejestruj się'}
+                                <ArrowRight size={20} />
+                            </>
+                        )}
                     </button>
                 </form>
 
-                {/* Przełącznik Logowanie / Rejestracja */}
                 <div className="toggle-container">
                     <p>
                         {isLoginView ? 'Nie masz jeszcze konta? ' : 'Masz już konto? '}
-                        <span
-                            className="toggle-link"
-                            onClick={() => setIsLoginView(!isLoginView)}
-                        >
+                        <span className="toggle-link" onClick={toggleView}>
                             {isLoginView ? 'Zarejestruj się' : 'Zaloguj się'}
                         </span>
                     </p>

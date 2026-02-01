@@ -1,55 +1,80 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './HomePage.css';
-import LandingView from './components/LandingView';
 import Sidebar from './components/Sidebar';
 import ChatArea from './components/ChatArea';
+import LoginPage from '../LoginPage/LoginPage';
 
 const HomePage = () => {
-    // 1. SPRAWDZANIE TOKENA PRZY STARCIE (Lazy Initialization)
-    // Funkcja w useState uruchamia się tylko raz przy odświeżeniu strony
-    const [isLoggedIn, setIsLoggedIn] = useState(() => {
-        const token = localStorage.getItem('access_token');
-        return !!token; // Zwraca true jeśli token istnieje, false jeśli nie
-    });
+    const [isLoggedIn, setIsLoggedIn] = useState(() => !!localStorage.getItem('access_token'));
+    const [chatHistory, setChatHistory] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
 
-    const chatHistory = [
-        { id: 1, title: "Debugowanie pętli w Pythonie" },
-        { id: 2, title: "Jak działa Django?" },
-        { id: 3, title: "Optymalizacja kodu SQL" },
-        { id: 4, title: "Generowanie wykresów Matplotlib" },
-    ];
-
-    // 2. FUNKCJE POMOCNICZE DO ZARZĄDZANIA SESJĄ
-
-    const handleLogin = () => {
-        // Tutaj normalnie byłoby zapytanie do API.
-        // Na razie symulujemy zapisanie tokena:
-        localStorage.setItem('access_token', 'przykladowy_token_jwt');
-        setIsLoggedIn(true);
-    };
-
-    const handleLogout = () => {
-        // Ważne: usuwamy token, żeby po odświeżeniu nie zalogowało nas ponownie
+    const handleLogout = useCallback(() => {
         localStorage.removeItem('access_token');
+        setChatHistory([]);
         setIsLoggedIn(false);
+    }, []);
+
+
+    const handleLogin = (token) => {
+        if (token) {
+            localStorage.setItem('access_token', token);
+            setIsLoggedIn(true);
+        }
     };
 
-    // --- WIDOKI ---
+    useEffect(() => {
+        let isMounted = true;
+
+        if (isLoggedIn) {
+            const fetchHistory = async () => {
+                setIsLoading(true);
+                try {
+                    const token = localStorage.getItem('access_token');
+                    const response = await fetch('http://127.0.0.1:8000/login', {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (isMounted) setChatHistory(data);
+                    } else if (response.status === 401) {
+                        handleLogout();
+                    }
+                } catch (error) {
+                    console.error("Błąd sieci:", error);
+                } finally {
+                    if (isMounted) setIsLoading(false);
+                }
+            };
+
+            fetchHistory();
+        }
+
+        return () => { isMounted = false; };
+    }, [isLoggedIn, handleLogout]);
+
+    // --- RENDEROWANIE ---
 
     if (isLoggedIn) {
         return (
             <div className="dashboard-container">
                 <Sidebar
                     history={chatHistory}
-                    onLogout={handleLogout} // Używamy nowej funkcji handleLogout
+                    onLogout={handleLogout}
+                    isLoading={isLoading}
                 />
                 <ChatArea />
             </div>
         );
     }
 
+    // LandingView musi przekazać onLoginSuccess do LoginPage
     return (
-        <LandingView onLogin={handleLogin} /> // Używamy nowej funkcji handleLogin
+        <LoginPage onLoginSuccess={handleLogin} />
     );
 };
 

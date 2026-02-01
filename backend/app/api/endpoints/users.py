@@ -38,19 +38,12 @@ def register(
     repo = UserRepository(db)
 
     if repo.get_by_username(data.username):
-        raise HTTPException(
-            status_code=400,
-            detail="Username already exists",
-        )
+        raise HTTPException(status_code=400, detail="Username already exists")
 
     if repo.get_by_email(data.email):
-        raise HTTPException(
-            status_code=400,
-            detail="Email already exists",
-        )
+        raise HTTPException(status_code=400, detail="Email already exists")
 
     encrypted_api_key = encrypt_data(data.gemini_api_key, SECRET_KEY)
-    
     recovery_tokens = generate_recovery_tokens()
     encrypted_tokens = encrypt_data(json.dumps(recovery_tokens), SECRET_KEY)
 
@@ -62,10 +55,19 @@ def register(
         recovery_tokens=encrypted_tokens,
     )
 
+    access_token_expires = timedelta(minutes=15)
+    access_token = create_access_token(
+        data={"sub": user.username}, expires_delta=access_token_expires
+    )
+
     return {
-        "id": user.id,
-        "username": user.username,
-        "email": user.email,
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": {
+            "id": user.id,
+            "username": user.username,
+            "email": user.email,
+        }
     }
 
 @router.post("/login", response_model=Token)
