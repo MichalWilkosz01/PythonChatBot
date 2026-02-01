@@ -1,6 +1,6 @@
 import json
 from datetime import timedelta
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, status
 from jose import jwt, JWTError, ExpiredSignatureError
 from sqlalchemy.orm import Session
 
@@ -30,7 +30,7 @@ from data.models import User
 
 router = APIRouter(prefix="/users", tags=["users"])
 
-@router.post("/register")
+@router.post("/register", status_code=status.HTTP_201_CREATED)
 def register(
     data: UserRegister,
     db: Session = Depends(get_db),
@@ -55,13 +55,16 @@ def register(
         recovery_tokens=encrypted_tokens,
     )
 
-    access_token_expires = timedelta(minutes=15)
+    access_token_expires = timedelta(minutes=5)
     access_token = create_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires
     )
+    
+    refresh_token = create_refresh_token(data={"sub": user.username})
 
     return {
         "access_token": access_token,
+        "refresh_token": refresh_token,
         "token_type": "bearer",
         "user": {
             "id": user.id,
@@ -76,8 +79,8 @@ def login(
     db: Session = Depends(get_db),
 ):
     repo = UserRepository(db)
-    user = repo.get_by_username(data.username)
-
+    user = repo.get_by_email(data.username)
+    
     if not user or not verify_password(data.password, user.password_hash):
         raise HTTPException(
             status_code=401,

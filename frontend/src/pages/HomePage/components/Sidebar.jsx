@@ -1,7 +1,9 @@
 import React from 'react';
 import { MessageSquare, Plus, History, User, LogOut } from 'lucide-react';
 
-const Sidebar = ({ history, onLogout }) => {
+const Sidebar = ({ history, onLogout, userData }) => {
+    const displayName = userData?.username || userData?.email || 'Użytkownik';
+    console.log(displayName)
     return (
         <aside className="sidebar">
             <div className="sidebar-header">
@@ -27,7 +29,7 @@ const Sidebar = ({ history, onLogout }) => {
             <div className="user-section">
                 <div className="user-info">
                     <User size={20} />
-                    <span>Użytkownik</span>
+                    <span>{displayName}</span>
                 </div>
                 <button onClick={onLogout} className="logout-btn" title="Wyloguj się">
                     <LogOut size={18} />

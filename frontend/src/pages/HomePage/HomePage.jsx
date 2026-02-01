@@ -3,22 +3,48 @@ import './HomePage.css';
 import Sidebar from './components/Sidebar';
 import ChatArea from './components/ChatArea';
 import LoginPage from '../LoginPage/LoginPage';
+import localStorageService from '../../services/localStorageService';
+
+// Funkcja pomocnicza do dekodowania JWT (bez instalowania dodatkowych bibliotek)
+const parseJwt = (token) => {
+    try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function (c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+    } catch (e) {
+        return null;
+    }
+};
 
 const HomePage = () => {
-    const [isLoggedIn, setIsLoggedIn] = useState(() => !!localStorage.getItem('access_token'));
+    const [isLoggedIn, setIsLoggedIn] = useState(() => !!localStorageService.getAccessToken());
+    const [userData, setUserData] = useState(() => localStorageService.getItem('user_data'));
     const [chatHistory, setChatHistory] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
 
     const handleLogout = useCallback(() => {
-        localStorage.removeItem('access_token');
+        localStorageService.clearAuth();
         setChatHistory([]);
+        setUserData(null);
         setIsLoggedIn(false);
     }, []);
 
-
     const handleLogin = (token) => {
         if (token) {
-            localStorage.setItem('access_token', token);
+            localStorageService.setAccessToken(token);
+
+            const decodedToken = parseJwt(token);
+
+            if (decodedToken && decodedToken.sub) {
+                const userPayload = { username: decodedToken.sub };
+                console.log(userPayload)
+                localStorageService.setItem('user_data', userPayload);
+                setUserData(userPayload);
+            }
+
             setIsLoggedIn(true);
         }
     };
@@ -30,8 +56,12 @@ const HomePage = () => {
             const fetchHistory = async () => {
                 setIsLoading(true);
                 try {
-                    const token = localStorage.getItem('access_token');
-                    const response = await fetch('http://127.0.0.1:8000/login', {
+                    // Używamy serwisu do pobrania tokena
+                    const token = localStorageService.getAccessToken();
+
+                    // Upewnij się, że ten URL jest poprawny (wcześniej miałeś błąd 404/405)
+                    const response = await fetch('http://127.0.0.1:8000/chat/history', { // <-- Zmieniłem na /chats, sprawdź swój endpoint!
+                        method: 'GET',
                         headers: {
                             'Authorization': `Bearer ${token}`,
                             'Content-Type': 'application/json'
@@ -65,14 +95,14 @@ const HomePage = () => {
                 <Sidebar
                     history={chatHistory}
                     onLogout={handleLogout}
-                    isLoading={isLoading}
+                    // isLoading={isLoading} // Sidebar zazwyczaj nie potrzebuje loadera, chyba że chcesz go tam wyświetlać
+                    userData={userData} // Teraz userData jest poprawnie przekazywane
                 />
                 <ChatArea />
             </div>
         );
     }
 
-    // LandingView musi przekazać onLoginSuccess do LoginPage
     return (
         <LoginPage onLoginSuccess={handleLogin} />
     );
