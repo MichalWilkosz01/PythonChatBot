@@ -9,21 +9,18 @@ LOCALHOST = "127.0.0.1"
 
 app = FastAPI()
 
-# --- KONFIGURACJA CORS ---
-# Tutaj definiujesz, kto może rozmawiać z Twoim API
 origins = [
-    "http://localhost:5173",  # Adres Twojego Reacta (Vite)
+    "http://localhost:5173", 
     "http://127.0.0.1:5173",
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,            # Zezwalaj na te adresy
-    allow_credentials=True,           # Pozwalaj na przesyłanie ciasteczek/autoryzacji
-    allow_methods=["*"],              # Pozwalaj na wszystkie metody (GET, POST, itp.)
-    allow_headers=["*"],              # Pozwalaj na wszystkie nagłówki
+    allow_origins=origins,            
+    allow_credentials=True,          
+    allow_methods=["*"],            
+    allow_headers=["*"],             
 )
-# -------------------------
 
 @app.get("/")
 def root():

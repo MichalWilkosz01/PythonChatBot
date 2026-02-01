@@ -1,7 +1,3 @@
-/* ChatArea.css - Desktop Professional Dark Mode */
-
-/* --- GŁÓWNY LAYOUT --- */
-
 .chat-area {
     flex: 1;
     display: flex;
@@ -10,11 +6,9 @@
     background-color: #1a1a1a;
     position: relative;
     overflow: hidden;
-    /* Dodajemy subtelny gradient w tle dla głębi */
     background-image: radial-gradient(circle at 50% 0%, #2a2a2a 0%, #1a1a1a 50%);
 }
 
-/* Widoki pomocnicze */
 .welcome-view,
 .loading-view {
     display: flex;
@@ -24,7 +18,6 @@
     text-align: center;
     color: #a1a1aa;
     height: 100%;
-    /* Ograniczenie szerokości dla lepszego wyglądu na dużym ekranie */
     max-width: 600px;
     margin: 0 auto;
 }
@@ -33,7 +26,6 @@
     color: #ffffff;
     margin-bottom: 1.5rem;
     font-size: 2.5rem;
-    /* Większy nagłówek na desktop */
     font-weight: 600;
     letter-spacing: -0.5px;
 }
@@ -41,13 +33,10 @@
 .spinner {
     animation: spin 1s linear infinite;
     color: #3b82f6;
-    /* Niebieski */
     width: 40px;
     height: 40px;
     margin-bottom: 1.5rem;
 }
-
-/* --- LISTA WIADOMOŚCI --- */
 
 .messages-container {
     flex: 1;
@@ -56,15 +45,11 @@
     display: flex;
     flex-direction: column;
     gap: 2rem;
-    /* Większy odstęp między wiadomościami na desktopie */
-
-    /* KLUCZOWA ZMIANA: Centrowanie na środku ekranu */
     width: 100%;
     max-width: 1000px;
     margin: 0 auto;
 }
 
-/* Scrollbar */
 .messages-container::-webkit-scrollbar {
     width: 10px;
 }
@@ -77,7 +62,6 @@
     background-color: rgba(255, 255, 255, 0.1);
     border-radius: 5px;
     border: 2px solid #1a1a1a;
-    /* Margines wokół suwaka */
 }
 
 .messages-container::-webkit-scrollbar-thumb:hover {
@@ -91,8 +75,6 @@
     font-size: 0.9rem;
 }
 
-/* --- WIADOMOŚCI --- */
-
 .message-wrapper {
     display: flex;
     flex-direction: column;
@@ -102,10 +84,8 @@
 .message {
     display: flex;
     gap: 1.25rem;
-    /* Zmniejszamy max-width, żeby tekst nie był "ścianą" na szerokim monitorze */
     max-width: 75%;
     align-items: flex-start;
-    /* Awatary zawsze przy górnej krawędzi wiadomości */
 }
 
 .user-message {
@@ -117,13 +97,10 @@
     align-self: flex-start;
 }
 
-/* Dymki */
 .bubble {
     padding: 1rem 1.5rem;
-    /* Większy padding wewnątrz dymka */
     border-radius: 16px;
     line-height: 1.6;
-    /* Lepsza interlinia dla czytelności */
     font-size: 1rem;
     position: relative;
 }
@@ -133,18 +110,15 @@
     color: #ffffff;
     border-bottom-right-radius: 4px;
     box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2);
-    /* Bardziej miękki cień */
 }
 
 .bot-bubble {
-    /* Zmiana na styl bardziej "desktopowy" - brak ramki, czyste tło */
     background: #27272a;
     color: #e4e4e7;
     border-bottom-left-radius: 4px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-/* Awatary */
 .avatar {
     width: 38px;
     height: 38px;
@@ -155,9 +129,7 @@
     flex-shrink: 0;
     font-size: 1.1rem;
 
-    /* ZMIANA: Obniżenie ikonek */
     margin-top: 10px;
-    /* Zwiększ lub zmniejsz tę wartość, aby idealnie dopasować wysokość */
 }
 
 .user-avatar {
@@ -172,32 +144,36 @@
     box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
 }
 
-/* --- OBSZAR WPISYWANIA (INPUT) --- */
-
 .input-area {
-    /* KLUCZOWA POPRAWKA: box-sizing zapobiega wychodzeniu poza kontener */
     box-sizing: border-box;
     width: 100%;
 
     padding: 2rem;
 
-    /* Upewniamy się, że tło nie wychodzi poza obszar */
     background: linear-gradient(to top, #1a1a1a 80%, rgba(26, 26, 26, 0) 100%);
 
     display: flex;
     justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
     position: relative;
-    /* Zabezpieczenie pozycji */
     z-index: 10;
-    /* Upewnia się, że jest nad treścią, ale pod modalem/sidebar'em jeśli ten ma wyższy index */
 }
 
-/* Wrapper formularza - bez zmian, ale dla pewności */
+.powered-by {
+    font-size: 0.75rem;
+    color: #71717a;
+    font-weight: 500;
+    opacity: 0.8;
+    cursor: default;
+    user-select: none;
+}
+
 .input-wrapper {
     width: 100%;
     max-width: 900px;
     box-sizing: border-box;
-    /* To też jest ważne */
 
     position: relative;
     display: flex;
@@ -211,7 +187,6 @@
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-/* Reszta bez zmian... */
 .input-area input {
     flex: 1;
     padding: 12px 16px;
@@ -223,7 +198,6 @@
     min-height: 24px;
 }
 
-/* Efekt skupienia na całym wrapperze (opcjonalnie, wymaga JS lub struktury focus-within) */
 .input-wrapper:focus-within {
     border-color: #3b82f6;
     box-shadow: 0 10px 30px -5px rgba(37, 99, 235, 0.2);
@@ -234,10 +208,8 @@
     color: #71717a;
 }
 
-/* Przycisk wysyłania */
 .input-area button {
     background: #3b82f6;
-    /* Pełny kolor tła przycisku */
     border: none;
     color: white;
     cursor: pointer;
@@ -272,3 +244,121 @@
         transform: rotate(360deg);
     }
 }
+.bot-bubble p {
+    margin-bottom: 1rem;
+}
+
+.bot-bubble p:last-child {
+    margin-bottom: 0;
+}
+
+.code-block-wrapper {
+    position: relative;
+    background: #0d1117; 
+    border-radius: 6px;
+    margin: 10px 0;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.code-block-header {
+    display: flex;
+    justify-content: flex-end;
+    padding: 6px 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.copy-code-btn {
+    background: transparent;
+    border: none;
+    color: #a1a1aa;
+    cursor: pointer;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.2s, background-color 0.2s;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.copy-code-btn:hover {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.bot-bubble pre {
+    background-color: transparent !important;
+    padding: 1rem;
+    border-radius: 0;
+    overflow-x: auto;
+    margin: 0 !important;
+    border: none !important;
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 0.2em 0.4em;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+.bot-bubble pre code {
+    background-color: transparent;
+    padding: 0;
+    font-size: 0.9em; 
+}
+
+.bot-bubble ul, .bot-bubble ol {
+    margin-bottom: 1rem;
+    padding-left: 1.5rem;
+}
+
+.bot-bubble li {
+    margin-bottom: 0.25rem;
+}
+
+.bot-bubble strong {
+    font-weight: 700;
+    color: #fff;
+}
+
+.bot-bubble a {
+    color: #60a5fa;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s;
+}
+
+.bot-bubble a:hover {
+    border-color: #60a5fa;
+}
+
+.bot-bubble table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 1rem 0;
+    font-size: 0.95rem;
+}
+
+.bot-bubble th, .bot-bubble td {
+    border: 1px solid #3f3f46;
+    padding: 0.75rem;
+    text-align: left;
+}
+
+.bot-bubble th {
+    background-color: rgba(255, 255, 255, 0.05);
+    font-weight: 600;
+    color: #f4f4f5;
+}
+
+.bot-bubble h1, .bot-bubble h2, .bot-bubble h3, .bot-bubble h4 {
+    color: #fff;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+}
+
+.bot-bubble h1:first-child, .bot-bubble h2:first-child, .bot-bubble h3:first-child {
+    margin-top: 0;
+}
+

@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
-import { User, Mail, Lock, Key, ArrowRight, Loader2 } from 'lucide-react';
+import { User, Mail, Lock, Key, ArrowRight, Loader2, HelpCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import authService from '../../services/authService';
+import LanguageSwitcher from '../../components/LanguageSwitcher';
 import './LoginPage.css';
 
 const LoginPage = ({ onLoginSuccess }) => {
+    const { t } = useTranslation();
     const [isLoginView, setIsLoginView] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -46,10 +49,10 @@ const LoginPage = ({ onLoginSuccess }) => {
             if (token) {
                 onLoginSuccess(token);
             } else {
-                throw new Error("Nie otrzymano tokenu autoryzacyjnego.");
+                throw new Error(t('login.errorToken'));
             }
         } catch (err) {
-            setError(err.message || 'Wystąpił nieoczekiwany błąd.');
+            setError(err.message || t('login.errorGeneric'));
         } finally {
             setIsLoading(false);
         }
@@ -57,26 +60,26 @@ const LoginPage = ({ onLoginSuccess }) => {
 
     return (
         <div className="login-container">
+            <LanguageSwitcher style={{ position: 'absolute', top: '20px', right: '20px' }} />
             <div className="glass-card login-card-adjustments">
                 <div className="header-section">
-                    <h1>{isLoginView ? 'Witaj ponownie!' : 'Stwórz konto'}</h1>
+                    <h1>{isLoginView ? t('login.welcomeBack') : t('login.createAccount')}</h1>
                     <p className="description">
                         {isLoginView
-                            ? 'Zaloguj się, aby kontynuować.'
-                            : 'Wypełnij dane, aby się zarejestrować.'}
+                            ? t('login.loginToContinue')
+                            : t('login.fillDetails')}
                     </p>
                 </div>
 
                 {error && <div className="error-message">{error}</div>}
 
                 <form className="form-container" onSubmit={handleSubmit}>
-                    {/* Email - zawsze widoczny */}
                     <div className="input-group">
                         <Mail className="input-icon" size={20} />
                         <input
                             type="email"
                             name="email"
-                            placeholder="Adres email"
+                            placeholder={t('login.emailPlaceholder')}
                             className="input-field"
                             value={formData.email}
                             onChange={handleInputChange}
@@ -84,7 +87,6 @@ const LoginPage = ({ onLoginSuccess }) => {
                         />
                     </div>
 
-                    {/* Pola widoczne tylko przy REJESTRACJI */}
                     {!isLoginView && (
                         <>
                             <div className="input-group">
@@ -92,7 +94,7 @@ const LoginPage = ({ onLoginSuccess }) => {
                                 <input
                                     type="text"
                                     name="username"
-                                    placeholder="Nazwa użytkownika"
+                                    placeholder={t('login.usernamePlaceholder')}
                                     className="input-field"
                                     value={formData.username}
                                     onChange={handleInputChange}
@@ -104,23 +106,31 @@ const LoginPage = ({ onLoginSuccess }) => {
                                 <input
                                     type="password"
                                     name="gemini_api_key"
-                                    placeholder="Gemini API Key"
-                                    className="input-field"
+                                    placeholder={t('login.apiKeyPlaceholder')}
+                                    className="input-field with-info"
                                     value={formData.gemini_api_key}
                                     onChange={handleInputChange}
                                     required
                                 />
+                                <a
+                                    href="https://aistudio.google.com/app/apikey"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="input-info-link"
+                                    title={t('login.learnMore')}
+                                >
+                                    <HelpCircle size={18} />
+                                </a>
                             </div>
                         </>
                     )}
 
-                    {/* Hasło - zawsze widoczne */}
                     <div className="input-group">
                         <Lock className="input-icon" size={20} />
                         <input
                             type="password"
                             name="password"
-                            placeholder="Hasło"
+                            placeholder={t('login.passwordPlaceholder')}
                             className="input-field"
                             value={formData.password}
                             onChange={handleInputChange}
@@ -133,7 +143,7 @@ const LoginPage = ({ onLoginSuccess }) => {
                             <Loader2 className="spinner" size={20} />
                         ) : (
                             <>
-                                {isLoginView ? 'Zaloguj się' : 'Zarejestruj się'}
+                                {isLoginView ? t('login.loginButton') : t('login.registerButton')}
                                 <ArrowRight size={20} />
                             </>
                         )}
@@ -142,9 +152,9 @@ const LoginPage = ({ onLoginSuccess }) => {
 
                 <div className="toggle-container">
                     <p>
-                        {isLoginView ? 'Nie masz jeszcze konta? ' : 'Masz już konto? '}
+                        {isLoginView ? t('login.noAccount') : t('login.hasAccount')}
                         <span className="toggle-link" onClick={toggleView}>
-                            {isLoginView ? 'Zarejestruj się' : 'Zaloguj się'}
+                            {isLoginView ? t('login.registerButton') : t('login.loginButton')}
                         </span>
                     </p>
                 </div>

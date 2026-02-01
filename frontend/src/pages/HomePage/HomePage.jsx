@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import './HomePage.css';
 import Sidebar from './components/Sidebar';
 import ChatArea from './components/ChatArea';
@@ -6,7 +7,6 @@ import LoginPage from '../LoginPage/LoginPage';
 import localStorageService from '../../services/localStorageService';
 import chatService from '../../services/chatService';
 
-// Funkcja pomocnicza do dekodowania JWT
 const parseJwt = (token) => {
     try {
         const base64Url = token.split('.')[1];
@@ -21,6 +21,7 @@ const parseJwt = (token) => {
 };
 
 const HomePage = () => {
+    const { t } = useTranslation();
     const [isLoggedIn, setIsLoggedIn] = useState(() => !!localStorageService.getAccessToken());
     const [userData, setUserData] = useState(() => localStorageService.getItem('user_data'));
     const [chatHistory, setChatHistory] = useState([]);
@@ -65,13 +66,50 @@ const HomePage = () => {
         }
     };
 
-    // --- NOWA FUNKCJA: Obsługa dodania nowej wiadomości bez odświeżania ---
     const handleMessageUpdate = (newMessage) => {
-        // Dodajemy nową wiadomość do istniejącej tablicy wiadomości
         setCurrentMessages((prevMessages) => [...prevMessages, newMessage]);
 
-        // Opcjonalnie: Tutaj można by też zaktualizować listę chatHistory, 
-        // np. przenieść aktywny czat na górę listy, ale to dodatkowy feature.
+        if (newMessage.title) {
+            setChatHistory(prevHistory => 
+                prevHistory.map(chat => 
+                    chat.id === newMessage.conversation_id 
+                        ? { ...chat, title: newMessage.title }
+                        : chat
+                )
+            );
+        }
+    };
+
+    const handleDeleteChat = async (chatId) => {
+        if (window.confirm(t('home.confirmDelete'))) {
+            try {
+                await chatService.deleteConversation(chatId);
+                setChatHistory(prev => prev.filter(chat => chat.id !== chatId));
+                if (activeChatId === chatId) {
+                    setActiveChatId(null);
+                    setCurrentMessages([]);
+                }
+            } catch (error) {
+                console.error("Failed to delete chat", error);
+            }
+        }
+    };
+
+    const handleNewChat = async () => {
+        try {
+            const newChatData = await chatService.createConversation(t('home.newChatTitle'));
+            const newChat = {
+                id: newChatData.conversation_id,
+                title: newChatData.title,
+                created_at: new Date().toISOString() 
+            };
+            
+            setChatHistory(prev => [newChat, ...prev]);
+            setActiveChatId(newChat.id);
+            setCurrentMessages([]);
+        } catch (error) {
+            console.error("Failed to create new chat", error);
+        }
     };
 
     useEffect(() => {
@@ -99,7 +137,6 @@ const HomePage = () => {
         return () => { isMounted = false; };
     }, [isLoggedIn]);
 
-    // --- RENDEROWANIE ---
 
     if (isLoggedIn) {
         return (
@@ -110,12 +147,13 @@ const HomePage = () => {
                     userData={userData}
                     onSelectChat={handleChatSelect}
                     activeChatId={activeChatId}
+                    onNewChat={handleNewChat}
+                    onDeleteChat={handleDeleteChat}
                 />
                 <ChatArea
                     messages={currentMessages}
                     isLoading={isChatLoading}
                     activeChatId={activeChatId}
-                    // Przekazujemy funkcję aktualizującą stan
                     onMessageSent={handleMessageUpdate}
                 />
             </div>

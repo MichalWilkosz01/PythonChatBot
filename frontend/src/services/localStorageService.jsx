@@ -6,12 +6,6 @@ const KEYS = {
 };
 
 const localStorageService = {
-    // --- Metody Ogólne ---
-
-    /**
-     * Zapisuje dane do localStorage.
-     * Automatycznie konwertuje obiekty/tablice na JSON.
-     */
     setItem: (key, value) => {
         try {
             const valueToStore = typeof value === 'object'
@@ -23,21 +17,14 @@ const localStorageService = {
         }
     },
 
-    /**
-     * Pobiera dane z localStorage.
-     * Próbuje automatycznie parsować JSON.
-     * Zwraca null, jeśli klucz nie istnieje.
-     */
     getItem: (key) => {
         try {
             const item = localStorage.getItem(key);
             if (!item) return null;
 
-            // Próbujemy parsować JSON (np. dla obiektów user_data)
             try {
                 return JSON.parse(item);
             } catch (e) {
-                // Jeśli to nie JSON (np. zwykły token string), zwracamy jako tekst
                 return item;
             }
         } catch (error) {
@@ -46,9 +33,6 @@ const localStorageService = {
         }
     },
 
-    /**
-     * Usuwa konkretny klucz.
-     */
     removeItem: (key) => {
         try {
             localStorage.removeItem(key);
@@ -57,9 +41,6 @@ const localStorageService = {
         }
     },
 
-    /**
-     * Czyści wszystko (używać ostrożnie).
-     */
     clear: () => {
         try {
             localStorage.clear();
@@ -67,9 +48,6 @@ const localStorageService = {
             console.error('Błąd czyszczenia localStorage:', error);
         }
     },
-
-    // --- Metody Specjalistyczne (Helpers) ---
-    // Ułatwiają pracę z autoryzacją, żeby nie wpisywać kluczy ręcznie
 
     setAccessToken: (token) => {
         localStorage.setItem(KEYS.ACCESS_TOKEN, token);
@@ -83,7 +61,6 @@ const localStorageService = {
         localStorage.removeItem(KEYS.ACCESS_TOKEN);
     },
 
-    // Opcjonalnie: Refresh Token
     setRefreshToken: (token) => {
         localStorage.setItem(KEYS.REFRESH_TOKEN, token);
     },
@@ -92,7 +69,6 @@ const localStorageService = {
         return localStorage.getItem(KEYS.REFRESH_TOKEN);
     },
 
-    // Obsługa wylogowania (czyści wszystkie tokeny)
     clearAuth: () => {
         localStorage.removeItem(KEYS.ACCESS_TOKEN);
         localStorage.removeItem(KEYS.REFRESH_TOKEN);

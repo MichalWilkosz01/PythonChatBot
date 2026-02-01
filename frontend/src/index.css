@@ -1,4 +1,3 @@
-/* src/index.css */
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -10,4 +9,29 @@ body {
   padding: 0;
   min-width: 320px;
   min-height: 100vh;
+}
+
+.language-switcher {
+  display: flex;
+  gap: 5px;
+}
+
+.language-switcher button {
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  background-color: transparent;
+  cursor: pointer;
+  border-radius: 4px;
+  color: inherit;
+}
+
+.language-switcher button:disabled {
+  background-color: #ddd;
+  color: #666;
+  cursor: default;
+  font-weight: bold;
+}
+
+.language-switcher button:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.1);
 }

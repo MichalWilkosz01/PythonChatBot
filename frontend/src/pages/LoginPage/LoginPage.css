@@ -1,6 +1,4 @@
-/* === BAZA Z TWOJEGO KODU === */
 .login-container {
-    /* Używam nazwy login-container, ale style są identyczne jak w home-container */
     width: 100vw;
     height: 100vh;
     display: flex;
@@ -10,32 +8,34 @@
     background-color: #1a1a1a;
     color: #ffffff;
     text-align: center;
-    /* Dodatkowy gradient dla lepszego efektu szkła */
     background: radial-gradient(circle at top right, #2c2c2c 0%, #1a1a1a 100%);
+    position: relative; /* Make sure it's relative for absolute positioning inside */
 }
+
+.login-lang-switcher {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
 
 .glass-card {
     background: rgba(255, 255, 255, 0.05);
-    /* Zwiększyłem nieco blur dla lepszego efektu pod inputami */
     backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     padding: 3rem;
     border-radius: 24px;
-    /* Lekko większe zaokrąglenie */
     max-width: 450px;
-    /* Lekko węższa karta dla formularza */
     width: 90%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    /* Zmieniam gap na mniejszy, bo formularz ma własne odstępy */
     gap: 2rem;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
 h1 {
     font-size: 2.2rem;
-    /* Lekkie zmniejszenie dla lepszych proporcji formularza */
     margin-bottom: 0.5rem;
     font-weight: 700;
 }
@@ -47,8 +47,6 @@ h1 {
     font-size: 0.95rem;
 }
 
-/* === NOWE STYLE DLA FORMULARZA === */
-
 .header-section {
     width: 100%;
 }
@@ -58,10 +56,8 @@ h1 {
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    /* Odstęp między inputami */
 }
 
-/* Grupa inputa (ikonka + pole) */
 .input-group {
     position: relative;
     width: 100%;
@@ -74,19 +70,14 @@ h1 {
     left: 16px;
     color: #a1a1aa;
     pointer-events: none;
-    /* Ikonka nie blokuje kliknięcia w input */
 }
 
-/* Stylizacja pola tekstowego, aby pasowało do szkła */
 .input-field {
     width: 100%;
     background: rgba(0, 0, 0, 0.2);
-    /* Ciemniejsze, półprzezroczyste tło */
     border: 1px solid rgba(255, 255, 255, 0.1);
-    /* Subtelna ramka */
     color: #ffffff;
     padding: 14px 16px 14px 48px;
-    /* Padding z lewej większy, żeby zrobić miejsce na ikonkę */
     border-radius: 12px;
     font-size: 1rem;
     outline: none;
@@ -95,24 +86,37 @@ h1 {
 
 .input-field::placeholder {
     color: #64748b;
-    /* Ciemniejszy placeholder */
 }
 
-/* Efekt po kliknięciu w pole */
+.input-info-link {
+    position: absolute;
+    right: 16px;
+    color: #a1a1aa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.input-info-link:hover {
+    color: #ffffff;
+}
+
+.input-field.with-info {
+    padding-right: 48px;
+}
+
 .input-field:focus {
     border-color: #2563eb;
-    /* Niebieska ramka */
     background: rgba(0, 0, 0, 0.3);
     box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
-    /* Delikatna niebieska poświata */
 }
 
 .input-field:focus+.input-icon {
     color: #2563eb;
-    /* Ikonka też robi się niebieska po focusie */
 }
 
-/* Przycisk submit rozciągnięty na całą szerokość */
 .submit-btn {
     background-color: #2563eb;
     color: white;
@@ -134,14 +138,12 @@ h1 {
 .submit-btn:hover {
     background-color: #1d4ed8;
     transform: translateY(-2px);
-    /* Lekkie uniesienie przycisku */
 }
 
 .submit-btn:active {
     transform: translateY(0);
 }
 
-/* Sekcja przełączania na dole */
 .toggle-container p {
     color: #a1a1aa;
     font-size: 0.9rem;
@@ -157,6 +159,5 @@ h1 {
 
 .toggle-link:hover {
     color: #60a5fa;
-    /* Jaśniejszy niebieski po najechaniu */
     text-decoration: underline;
 }

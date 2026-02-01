@@ -1,34 +1,22 @@
-import api from './api'; // Upewnij się, że ścieżka do api.js jest poprawna
+import api from './api'; 
 import localStorageService from './localStorageService';
+import i18n from '../i18n';
 
 const authService = {
-    /**
-     * Logowanie użytkownika
-     */
     async login(email, password) {
         try {
-            // Używamy api.post zamiast fetch
-            // api.js ma już zdefiniowany baseURL
             const response = await api.post('/users/login', {
-                username: email, // Backend oczekuje pola 'username'
+                username: email, 
                 password
             });
 
             const data = response.data;
 
-            // WARTOŚĆ DODANA:
-            // Od razu zapisujemy tokeny w serwisie, aby interceptory api.js
-            // mogły z nich korzystać przy kolejnych zapytaniach.
             if (data.access_token) {
                 localStorageService.setAccessToken(data.access_token);
-                // Jeśli backend zwraca też refresh token:
                 if (data.refresh_token) {
                     localStorageService.setRefreshToken(data.refresh_token);
                 }
-
-                // Opcjonalnie: Dekodowanie i zapis danych użytkownika (jeśli nie robisz tego w HomePage)
-                // const user = parseJwt(data.access_token);
-                // localStorageService.setItem('user_data', { username: user.sub });
             }
 
             return data;
@@ -37,9 +25,6 @@ const authService = {
         }
     },
 
-    /**
-     * Rejestracja użytkownika
-     */
     async register(userData) {
         try {
             const response = await api.post('/users/register', userData);
@@ -49,29 +34,32 @@ const authService = {
         }
     },
 
-    /**
-     * Ujednolicona obsługa błędów dla Axios + FastAPI (Pydantic)
-     */
     handleError(error) {
-        // 1. Sprawdź, czy serwer odpowiedział kodem błędu (np. 400, 401, 422)
         if (error.response && error.response.data) {
             const data = error.response.data;
 
-            // Logika wyciągania komunikatu błędu (zgodna z FastAPI/Pydantic)
-            const errorMsg = typeof data.detail === 'string'
+            const rawErrorMsg = typeof data.detail === 'string'
                 ? data.detail
-                : (Array.isArray(data.detail) ? data.detail[0].msg : 'Wystąpił nieoczekiwany błąd serwera.');
+                : (Array.isArray(data.detail) ? data.detail[0].msg : null);
 
-            throw new Error(errorMsg);
+            if (rawErrorMsg) {
+                // Spróbuj przetłumaczyć błąd, jeśli klucz istnieje w słowniku błędów
+                const translationKey = `errors.${rawErrorMsg}`;
+                if (i18n.exists(translationKey)) {
+                    throw new Error(i18n.t(translationKey));
+                }
+                // Jeśli brak tłumaczenia, zwróć oryginalny komunikat
+                throw new Error(rawErrorMsg);
+            }
+            
+            throw new Error(i18n.t('errors.unknown_error'));
         }
 
-        // 2. Brak odpowiedzi serwera (np. serwer wyłączony, brak internetu)
         if (error.request) {
-            throw new Error('Brak odpowiedzi z serwera. Sprawdź połączenie internetowe.');
+            throw new Error(i18n.t('errors.network_error'));
         }
 
-        // 3. Inny błąd (np. błąd w konfiguracji zapytania)
-        throw new Error(error.message || 'Wystąpił nieznany błąd aplikacji.');
+        throw new Error(i18n.t('errors.unknown_error'));
     }
 };
 

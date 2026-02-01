@@ -1,6 +1,6 @@
 from sqlalchemy import desc
 from sqlalchemy.orm import Session
-from data.models import Conversation, Message # Upewnij się, że importujesz właściwe modele
+from data.models import Conversation, Message
 
 class ChatRepository:
     def __init__(self, db: Session):
@@ -36,6 +36,27 @@ class ChatRepository:
         self.db.commit()
         return new_msg
     
+    def update_conversation_title(self, conversation_id: int, new_title: str):
+        conversation = self.db.query(Conversation).filter(Conversation.id == conversation_id).first()
+        if conversation:
+            conversation.title = new_title
+            self.db.commit()
+            self.db.refresh(conversation)
+
+    def get_conversation(self, conversation_id: int):
+        return self.db.query(Conversation).filter(Conversation.id == conversation_id).first()
+
+    def delete_conversation(self, conversation_id: int, user_id: int) -> bool:
+        conversation = self.db.query(Conversation).filter(
+            Conversation.id == conversation_id,
+            Conversation.user_id == user_id
+        ).first()
+        if conversation:
+            self.db.delete(conversation)
+            self.db.commit()
+            return True
+        return False
+
     def get_user_conversations(self, user_id: int):
         """
         Pobiera listę rozmów użytkownika (do paska bocznego).
