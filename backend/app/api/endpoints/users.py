@@ -1,4 +1,6 @@
-from fastapi import APIRouter, HTTPException, Depends
+import json
+from datetime import timedelta
+from fastapi import APIRouter, HTTPException, Depends, status
 from jose import jwt, JWTError, ExpiredSignatureError
 from sqlalchemy.orm import Session
 
@@ -7,23 +9,29 @@ from app.repository.user_repository import UserRepository
 from app.api.dtos.users.user_register import UserRegister
 from app.api.dtos.users.user_login import UserLogin
 from app.api.dtos.users.token import Token
+from app.api.dtos.users.user_profile import UserProfile
+from app.api.dtos.users.recovery_token_verify import RecoveryTokenVerify
+from app.api.dtos.users.password_reset import PasswordReset
 from app.core.security import (
     hash_password,
     verify_password,
     create_access_token,
     create_refresh_token,
     encrypt_data,
+    decrypt_data,
+    generate_recovery_tokens,
     SECRET_KEY,
     ALGORITHM,
 )
 from app.repository.db import get_db
 from app.api.deps import get_current_user
 from app.api.dtos.users.user_update import UserUpdate
+from app.api.dtos.users.password_request import PasswordRequest
 from data.models import User
 
 router = APIRouter(prefix="/users", tags=["users"])
 
-@router.post("/register")
+@router.post("/register", status_code=status.HTTP_201_CREATED)
 def register(
     data: UserRegister,
     db: Session = Depends(get_db),
@@ -31,30 +39,39 @@ def register(
     repo = UserRepository(db)
 
     if repo.get_by_username(data.username):
-        raise HTTPException(
-            status_code=400,
-            detail="Username already exists",
-        )
+        raise HTTPException(status_code=400, detail="Username already exists")
 
     if repo.get_by_email(data.email):
-        raise HTTPException(
-            status_code=400,
-            detail="Email already exists",
-        )
+        raise HTTPException(status_code=400, detail="Email already exists")
 
     encrypted_api_key = encrypt_data(data.gemini_api_key, SECRET_KEY)
+    recovery_tokens = generate_recovery_tokens()
+    encrypted_tokens = encrypt_data(json.dumps(recovery_tokens), SECRET_KEY)
 
     user = repo.create(
         username=data.username,
         email=data.email,
         password_hash=hash_password(data.password),
         encrypted_api_key=encrypted_api_key,
+        recovery_tokens=encrypted_tokens,
     )
 
+    access_token_expires = timedelta(minutes=5)
+    access_token = create_access_token(
+        data={"sub": user.username}, expires_delta=access_token_expires
+    )
+    
+    refresh_token = create_refresh_token(data={"sub": user.username})
+
     return {
-        "id": user.id,
-        "username": user.username,
-        "email": user.email,
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer",
+        "user": {
+            "id": user.id,
+            "username": user.username,
+            "email": user.email,
+        }
     }
 
 @router.post("/login", response_model=Token)
@@ -63,8 +80,8 @@ def login(
     db: Session = Depends(get_db),
 ):
     repo = UserRepository(db)
-    user = repo.get_by_username(data.username)
-
+    user = repo.get_by_email(data.username)
+    
     if not user or not verify_password(data.password, user.password_hash):
         raise HTTPException(
             status_code=401,
@@ -133,3 +150,107 @@ def update_profile(
         raise HTTPException(status_code=404, detail="User not found")
 
     return {"message": "Profile updated successfully"}
+
+@router.get("/account", response_model=UserProfile)
+def get_profile(
+    current_user: User = Depends(get_current_user),
+):
+    api_key = None
+    if current_user.encrypted_api_key:
+        try:
+            api_key = decrypt_data(current_user.encrypted_api_key, SECRET_KEY)
+        except Exception:
+            pass
+
+    return UserProfile(
+        username=current_user.username,
+        email=current_user.email,
+        api_key=api_key,
+        recovery_tokens=[]
+    )
+
+@router.post("/reveal-tokens", response_model=list[str])
+def reveal_recovery_tokens(
+    data: PasswordRequest,
+    current_user: User = Depends(get_current_user),
+):
+    if not verify_password(data.password, current_user.password_hash):
+        raise HTTPException(status_code=401, detail="Invalid password")
+        
+    tokens = []
+    if current_user.recovery_tokens:
+        try:
+            decrypted = decrypt_data(current_user.recovery_tokens, SECRET_KEY)
+            if decrypted:
+                tokens = json.loads(decrypted)
+        except Exception:
+            pass 
+            
+    return tokens
+
+@router.post("/recover-password")
+def verify_recovery_token(
+    data: RecoveryTokenVerify,
+    db: Session = Depends(get_db),
+):
+    repo = UserRepository(db)
+    user = repo.get_by_username(data.username) 
+
+    if not user:
+         raise HTTPException(status_code=404, detail="User not found")
+    
+    if not user.recovery_tokens:
+         raise HTTPException(status_code=400, detail="No recovery tokens found")
+
+    decrypted = decrypt_data(user.recovery_tokens, SECRET_KEY)
+    if not decrypted:
+         raise HTTPException(status_code=500, detail="Error decrypting tokens")
+    
+    tokens = json.loads(decrypted)
+    
+    if data.recovery_token not in tokens:
+        raise HTTPException(status_code=400, detail="Invalid recovery token")
+    
+    reset_token_expires = timedelta(minutes=15)
+    reset_data = {"sub": user.username, "type": "reset"}
+    
+    reset_token = create_access_token(reset_data, expires_delta=reset_token_expires)
+
+    tokens.remove(data.recovery_token)
+    
+    new_token = generate_recovery_tokens(count=1)[0]
+    tokens.append(new_token)
+    
+    new_encrypted_tokens = encrypt_data(json.dumps(tokens), SECRET_KEY)
+    
+    user.recovery_tokens = new_encrypted_tokens
+    db.commit()
+
+    return {"reset_token": reset_token}
+
+@router.post("/reset-password")
+def reset_password(
+    data: PasswordReset,
+    db: Session = Depends(get_db),
+):
+    try:
+        payload = jwt.decode(data.token, SECRET_KEY, algorithms=[ALGORITHM])
+        if payload.get("type") != "reset":
+             raise HTTPException(status_code=401, detail="Invalid token type")
+        
+        username = payload.get("sub")
+        if not username:
+             raise HTTPException(status_code=401, detail="Invalid token subject")
+             
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid or expired reset token")
+
+    repo = UserRepository(db)
+    user = repo.get_by_username(username)
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    repo.update_password(user, hash_password(data.new_password))
+    
+    return {"message": "Password updated successfully"}

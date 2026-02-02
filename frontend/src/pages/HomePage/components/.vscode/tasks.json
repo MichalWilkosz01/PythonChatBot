@@ -1,0 +1,13 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "append_styles",
+			"type": "shell",
+			"command": "echo .modal-subtitle { display: flex; align-items: center; gap: 8px; margin: 0 0 10px 0; color: #ccc; font-size: 1rem; } .token-auth-container { display: flex; gap: 10px; } .token-auth-container .sidebar-input-group { flex: 1; } .view-tokens-btn {    background: #333; color: white; border: 1px solid #444; padding: 0 15px; border-radius: 6px; cursor: pointer; transition: background 0.2s; } .view-tokens-btn:hover:not(:disabled) { background: #444; } .view-tokens-btn:disabled { opacity: 0.5; cursor: not-allowed; } .tokens-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 10px; } .token-chip { background: #222; border: 1px solid #333; padding: 6px 10px; border-radius: 4px; font-family: monospace; text-align: center; color: #4ec9b0; cursor: pointer; transition: background 0.2s; user-select: all; } .token-chip:hover { background: #2a2a2a; border-color: #444; } .error-text { color: #ef4444; font-size: 0.85rem; margin-top: 8px; } .no-tokens { color: #888; font-style: italic; font-size: 0.9rem; } >> c:\\Users\\PCAS1\\Desktop\\PythonChatBot\\PythonChatBot\\frontend\\src\\pages\\HomePage\\components\\Sidebar.css",
+			"args": [],
+			"problemMatcher": [],
+			"group": "none"
+		}
+	]
+}

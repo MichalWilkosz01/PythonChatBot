@@ -5,7 +5,6 @@ from google import genai
 
 MODEL = "gemini-2.5-flash"
 
-
 class ChatAgent:
     def __init__(self, api_key: str):
         self.client = genai.Client(api_key=api_key)
@@ -13,7 +12,6 @@ class ChatAgent:
     def search_web(self, query: str, max_results: int = 3):
         try:
             print(f"Searching web for: {query}")
-            # Try specific backend if default fails, or catch specific exceptions
             with DDGS() as ddgs:
                 results = list(ddgs.text(query, max_results=max_results))
                 print(f"Found {len(results)} results")
@@ -101,3 +99,21 @@ class ChatAgent:
             return response.text, sources
         except Exception as e:
             return f"Error generating response: {e}", []
+
+    def generate_title(self, user_query: str, response_text: str) -> str:
+        prompt = f"""
+        Based on the following user query and model response, generate a short, concise title (max 5-6 words) for this conversation.
+        The title should summarize the topic. Do not use quotes.
+        
+        User Query: {user_query}
+        Response: {response_text[:200]}... 
+        """
+        try:
+            response = self.client.models.generate_content(
+                model=MODEL,
+                contents=prompt
+            )
+            return response.text.replace('"', '').strip()
+        except Exception as e:
+            print(f"Error generating title: {e}")
+            return "New Chat"

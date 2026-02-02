@@ -1,4 +1,3 @@
-/* === WIDOK POWITALNY (NIEZALOGOWANY) === */
 .home-container {
     width: 100vw;
     height: 100vh;
@@ -57,28 +56,23 @@ h1 {
     transform: translateY(-2px);
 }
 
-/* === WIDOK PANELU (ZALOGOWANY) === */
 .dashboard-container {
     width: 100vw;
     height: 100vh;
     display: flex;
-    /* Układ poziomy: Lewo (Sidebar) | Prawo (Czat) */
     background-color: #1a1a1a;
     color: white;
     overflow: hidden;
 }
 
-/* Sidebar (Lewa strona) */
 .sidebar {
     width: 280px;
     background: rgba(255, 255, 255, 0.03);
-    /* Bardzo subtelne tło */
     border-right: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
     flex-direction: column;
     padding: 1.5rem;
     flex-shrink: 0;
-    /* Sidebar się nie zgniata */
 }
 
 .sidebar-header {
@@ -117,10 +111,8 @@ h1 {
     background: rgba(37, 99, 235, 0.2);
 }
 
-/* Lista historii */
 .history-list {
     flex: 1;
-    /* Zajmuje dostępne miejsce */
     overflow-y: auto;
     margin-bottom: 1rem;
 }
@@ -153,7 +145,6 @@ h1 {
     color: white;
 }
 
-/* Sekcja użytkownika na dole */
 .user-section {
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     padding-top: 1rem;
@@ -173,7 +164,6 @@ h1 {
     background: transparent;
     border: none;
     color: #ef4444;
-    /* Czerwony kolor */
     cursor: pointer;
     padding: 5px;
     border-radius: 5px;
@@ -183,7 +173,6 @@ h1 {
     background: rgba(239, 68, 68, 0.1);
 }
 
-/* Główny obszar (Prawa strona) */
 .main-chat-area {
     flex: 1;
     display: flex;
