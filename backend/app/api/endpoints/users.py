@@ -26,6 +26,7 @@ from app.core.security import (
 from app.repository.db import get_db
 from app.api.deps import get_current_user
 from app.api.dtos.users.user_update import UserUpdate
+from app.api.dtos.users.password_request import PasswordRequest
 from data.models import User
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -154,6 +155,28 @@ def update_profile(
 def get_profile(
     current_user: User = Depends(get_current_user),
 ):
+    api_key = None
+    if current_user.encrypted_api_key:
+        try:
+            api_key = decrypt_data(current_user.encrypted_api_key, SECRET_KEY)
+        except Exception:
+            pass
+
+    return UserProfile(
+        username=current_user.username,
+        email=current_user.email,
+        api_key=api_key,
+        recovery_tokens=[]
+    )
+
+@router.post("/reveal-tokens", response_model=list[str])
+def reveal_recovery_tokens(
+    data: PasswordRequest,
+    current_user: User = Depends(get_current_user),
+):
+    if not verify_password(data.password, current_user.password_hash):
+        raise HTTPException(status_code=401, detail="Invalid password")
+        
     tokens = []
     if current_user.recovery_tokens:
         try:
@@ -162,12 +185,8 @@ def get_profile(
                 tokens = json.loads(decrypted)
         except Exception:
             pass 
-
-    return UserProfile(
-        username=current_user.username,
-        email=current_user.email,
-        recovery_tokens=tokens
-    )
+            
+    return tokens
 
 @router.post("/recover-password")
 def verify_recovery_token(
@@ -198,6 +217,10 @@ def verify_recovery_token(
     reset_token = create_access_token(reset_data, expires_delta=reset_token_expires)
 
     tokens.remove(data.recovery_token)
+    
+    new_token = generate_recovery_tokens(count=1)[0]
+    tokens.append(new_token)
+    
     new_encrypted_tokens = encrypt_data(json.dumps(tokens), SECRET_KEY)
     
     user.recovery_tokens = new_encrypted_tokens

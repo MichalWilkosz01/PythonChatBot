@@ -6,6 +6,8 @@ import ChatArea from './components/ChatArea';
 import LoginPage from '../LoginPage/LoginPage';
 import localStorageService from '../../services/localStorageService';
 import chatService from '../../services/chatService';
+import userService from '../../services/userService';
+import toast from 'react-hot-toast';
 
 const parseJwt = (token) => {
     try {
@@ -40,16 +42,30 @@ const HomePage = () => {
     const handleLogin = (token) => {
         if (token) {
             localStorageService.setAccessToken(token);
-
             const decodedToken = parseJwt(token);
 
             if (decodedToken && decodedToken.sub) {
-                const userPayload = { username: decodedToken.sub };
-                localStorageService.setItem('user_data', userPayload);
-                setUserData(userPayload);
+                const initialPayload = { username: decodedToken.sub };
+                setUserData(initialPayload);
+                localStorageService.setItem('user_data', initialPayload);
             }
-
             setIsLoggedIn(true);
+        }
+    };
+
+    const handleUpdateUser = async (updatedData) => {
+        try {
+            await userService.updateProfile(updatedData);
+
+            const { new_password, api_key, ...safeUpdates } = updatedData;
+            const newUserData = { ...userData, ...safeUpdates };
+
+            setUserData(newUserData);
+            localStorageService.setItem('user_data', newUserData);
+            console.log("Profil zaktualizowany:", newUserData);
+        } catch (error) {
+            console.error("Błąd aktualizacji profilu:", error);
+            toast.error(t('profile.updateError', 'Failed to update profile'));
         }
     };
 
@@ -68,13 +84,10 @@ const HomePage = () => {
 
     const handleMessageUpdate = (newMessage) => {
         setCurrentMessages((prevMessages) => [...prevMessages, newMessage]);
-
         if (newMessage.title) {
-            setChatHistory(prevHistory => 
-                prevHistory.map(chat => 
-                    chat.id === newMessage.conversation_id 
-                        ? { ...chat, title: newMessage.title }
-                        : chat
+            setChatHistory(prevHistory =>
+                prevHistory.map(chat =>
+                    chat.id === newMessage.conversation_id ? { ...chat, title: newMessage.title } : chat
                 )
             );
         }
@@ -101,9 +114,8 @@ const HomePage = () => {
             const newChat = {
                 id: newChatData.conversation_id,
                 title: newChatData.title,
-                created_at: new Date().toISOString() 
+                created_at: new Date().toISOString()
             };
-            
             setChatHistory(prev => [newChat, ...prev]);
             setActiveChatId(newChat.id);
             setCurrentMessages([]);
@@ -120,23 +132,33 @@ const HomePage = () => {
                 setIsLoading(true);
                 try {
                     const data = await chatService.getConversations();
-
-                    if (isMounted) {
-                        setChatHistory(data);
-                    }
+                    if (isMounted) setChatHistory(data);
                 } catch (error) {
-                    console.error("Błąd pobierania historii czatów:", error);
+                    console.error("Błąd historii:", error);
                 } finally {
                     if (isMounted) setIsLoading(false);
                 }
             };
 
+            const fetchUserProfile = async () => {
+                try {
+                    const profileData = await userService.getProfile();
+                    if (isMounted) {
+                        console.log("Pobrane dane profilu:", profileData);
+                        setUserData(profileData);
+                        localStorageService.setItem('user_data', profileData);
+                    }
+                } catch (error) {
+                    console.error("Błąd pobierania profilu (/account):", error);
+                }
+            };
+
             fetchHistory();
+            fetchUserProfile();
         }
 
         return () => { isMounted = false; };
     }, [isLoggedIn]);
-
 
     if (isLoggedIn) {
         return (
@@ -149,6 +171,7 @@ const HomePage = () => {
                     activeChatId={activeChatId}
                     onNewChat={handleNewChat}
                     onDeleteChat={handleDeleteChat}
+                    onUpdateUser={handleUpdateUser}
                 />
                 <ChatArea
                     messages={currentMessages}
@@ -160,9 +183,7 @@ const HomePage = () => {
         );
     }
 
-    return (
-        <LoginPage onLoginSuccess={handleLogin} />
-    );
+    return <LoginPage onLoginSuccess={handleLogin} />;
 };
 
 export default HomePage;

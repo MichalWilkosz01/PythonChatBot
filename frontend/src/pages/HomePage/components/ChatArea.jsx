@@ -5,6 +5,7 @@ import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
 import 'highlight.js/styles/github-dark.css';
 import { useTranslation } from 'react-i18next';
+import toast from 'react-hot-toast';
 import chatService from '../../../services/chatService';
 import './ChatArea.css';
 
@@ -78,7 +79,7 @@ const ChatArea = ({ messages, isLoading, activeChatId, onMessageSent }) => {
         } catch (error) {
             console.error("Błąd wysyłania:", error);
             setInputValue(messageText);
-            alert(t('chat.connectionError'));
+            toast.error(t('chat.connectionError'));
         } finally {
             setIsSending(false);
             setTempUserMessage('');
@@ -155,7 +156,7 @@ const ChatArea = ({ messages, isLoading, activeChatId, onMessageSent }) => {
                         type="submit"
                         disabled={!inputValue.trim() || isSending}
                     >
-                        {isSending ? <Loader2 className="spinner" size={20} /> : <Send size={20} />}
+                        {isSending ? <Loader2 className="button-spinner" size={20} /> : <Send size={20} />}
                     </button>
                 </div>
                 <div className="powered-by">

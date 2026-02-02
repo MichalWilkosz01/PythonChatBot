@@ -34,6 +34,30 @@ const authService = {
         }
     },
 
+    async verifyRecoveryToken(username, recoveryToken) {
+        try {
+            const response = await api.post('/users/recover-password', {
+                username,
+                recovery_token: recoveryToken
+            });
+            return response.data; // Should return { reset_token: "..." }
+        } catch (error) {
+            this.handleError(error);
+        }
+    },
+
+    async resetPassword(resetToken, newPassword) {
+        try {
+            const response = await api.post('/users/reset-password', {
+                token: resetToken,
+                new_password: newPassword
+            });
+            return response.data;
+        } catch (error) {
+            this.handleError(error);
+        }
+    },
+
     handleError(error) {
         if (error.response && error.response.data) {
             const data = error.response.data;

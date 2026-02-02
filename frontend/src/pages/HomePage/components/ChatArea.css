@@ -38,6 +38,10 @@
     margin-bottom: 1.5rem;
 }
 
+.button-spinner {
+    animation: spin 1s linear infinite;
+}
+
 .messages-container {
     flex: 1;
     padding: 2rem;

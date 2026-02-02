@@ -19,7 +19,33 @@ const resources = {
         hasAccount: "Masz już konto? ",
         learnMore: "Dowiedz się więcej",
         errorToken: "Nie otrzymano tokenu autoryzacyjnego.",
-        errorGeneric: "Wystąpił nieoczekiwany błąd."
+        errorGeneric: "Wystąpił nieoczekiwany błąd.",
+        confirmPasswordPlaceholder: "Powtórz hasło",
+        errorPasswordsDoNotMatch: "Hasła nie są identyczne",
+        forgotPassword: "Nie pamiętam hasła",
+        recoverTitle: "Odzyskiwanie hasła",
+        recoverStep1Desc: "Podaj nazwę użytkownika i jeden z tokenów odzyskiwania.",
+        recoverStep2Desc: "Ustaw nowe hasło dla swojego konta.",
+        tokenPlaceholder: "Token odzyskiwania",
+        verifyButton: "Weryfikuj token",
+        resetButton: "Zmień hasło",
+        backToLogin: "Powrót do logowania",
+        passwordResetSuccess: "Hasło zostało pomyślnie zmienione! Zaloguj się ponownie."
+      },
+      profile: {
+          title: "Edytuj profil",
+          passwordMismatch: "Nowe hasła nie są identyczne!",
+          currentPasswordRequired: "Wymagane jest obecne hasło, aby ustawić nowe.",
+          updateError: "Nie udało się zaktualizować profilu",
+          save: "Zapisz zmiany",
+          confirmPasswordPlaceholder: "Powtórz nowe hasło",
+          currentPasswordPlaceholder: "Obecne hasło",
+          newPasswordPlaceholder: "Nowe hasło",
+          recoveryTokensTitle: "Tokeny odzyskiwania",
+          showTokens: "Pokaż tokeny",
+          enterPasswordToShow: "Wpisz hasło, aby zobaczyć tokeny",
+          viewTokens: "Zobacz",
+          copyToken: "Kopiuj"
       },
       errors: {
         "Username already exists": "Użytkownik o takiej nazwie już istnieje.",
@@ -27,7 +53,12 @@ const resources = {
         "Invalid credentials": "Nieprawidłowy login lub hasło.",
         "Signature has expired": "Twoja sesja wygasła. Zaloguj się ponownie.",
         "network_error": "Brak połączenia z serwerem. Sprawdź internet.",
-        "unknown_error": "Wystąpił nieoczekiwany błąd."
+        "unknown_error": "Wystąpił nieoczekiwany błąd.",
+        "User not found": "Nie znaleziono użytkownika.",
+        "No recovery tokens found": "Użytkownik nie posiada tokenów odzyskiwania.",
+        "Invalid recovery token": "Nieprawidłowy token odzyskiwania.",
+        "Invalid or expired reset token": "Sesja resetowania hasła wygasła.",
+        "Invalid password": "Nieprawidłowe hasło."
       },
       sidebar: {
         newChat: "Nowy czat",
@@ -70,7 +101,33 @@ const resources = {
         hasAccount: "Already have an account? ",
         learnMore: "Learn more",
         errorToken: "No authorization token received.",
-        errorGeneric: "An unexpected error occurred."
+        errorGeneric: "An unexpected error occurred.",
+        confirmPasswordPlaceholder: "Confirm Password",
+        errorPasswordsDoNotMatch: "Passwords do not match",
+        forgotPassword: "Forgot password?",
+        recoverTitle: "Password Recovery",
+        recoverStep1Desc: "Enter your username and one of your recovery tokens.",
+        recoverStep2Desc: "Set a new password for your account.",
+        tokenPlaceholder: "Recovery Token",
+        verifyButton: "Verify Token",
+        resetButton: "Reset Password",
+        backToLogin: "Back to Login",
+        passwordResetSuccess: "Password successfully changed! Please log in."
+      },
+      profile: {
+          title: "Edit Profile",
+          passwordMismatch: "New passwords do not match!",
+          currentPasswordRequired: "Current password is required to set a new one.",
+          updateError: "Failed to update profile",
+          save: "Save Changes",
+          confirmPasswordPlaceholder: "Repeat New Password",
+          currentPasswordPlaceholder: "Current Password",
+          newPasswordPlaceholder: "New Password",
+          recoveryTokensTitle: "Recovery Tokens",
+          showTokens: "Show Tokens",
+          enterPasswordToShow: "Enter password to view tokens",
+          viewTokens: "View",
+          copyToken: "Copy"
       },
       errors: {
         "Username already exists": "Username is already taken.",
@@ -78,7 +135,12 @@ const resources = {
         "Invalid credentials": "Invalid username or password.",
         "Signature has expired": "Your session has expired. Please log in again.",
         "network_error": "No connection to server. Check your internet.",
-        "unknown_error": "An unexpected error occurred."
+        "unknown_error": "An unexpected error occurred.",
+        "User not found": "User not found.",
+        "No recovery tokens found": "User has no recovery tokens.",
+        "Invalid recovery token": "Invalid recovery token.",
+        "Invalid or expired reset token": "Password reset session expired.",
+        "Invalid password": "Invalid password."
       },
       sidebar: {
         newChat: "New chat",

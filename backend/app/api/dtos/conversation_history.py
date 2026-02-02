@@ -5,8 +5,7 @@ from datetime import datetime
 class ConversationHistory(BaseModel):
     id: int
     title: str
-    created_at: datetime  # Opcjonalne, jeśli chcesz sortować po dacie na froncie
+    created_at: datetime 
 
     class Config:
-        # To jest KLUCZOWE - pozwala FastAPI czytać dane z obiektów SQLAlchemy
         from_attributes = True
